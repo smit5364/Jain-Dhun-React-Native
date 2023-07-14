@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions} from 'react-native';
+import {Dimensions, StatusBar} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
@@ -12,6 +12,7 @@ const Tab = createMaterialBottomTabNavigator();
 const App = () => {
   return (
     <NavigationContainer>
+      <StatusBar backgroundColor="#673AB7" />
       <Tab.Navigator>
         <Tab.Screen
           name="Home"
@@ -37,6 +38,7 @@ const App = () => {
           name="Profile"
           component={Profile}
           options={{
+            title: 'Jain Dhun',
             tabBarLabel: 'Profile',
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons name="account" color={color} size={26} />

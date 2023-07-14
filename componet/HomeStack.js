@@ -17,6 +17,10 @@ const HomeStack = () => {
             backgroundColor: '#673AB7',
           },
           headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
         }}
       />
       <Stack.Screen
@@ -27,6 +31,10 @@ const HomeStack = () => {
             backgroundColor: '#673AB7',
           },
           headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
         }}
       />
     </Stack.Navigator>
