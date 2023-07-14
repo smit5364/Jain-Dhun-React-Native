@@ -5,7 +5,6 @@ import React, {useEffect, useState, useLayoutEffect} from 'react';
 import SearchHeader from 'react-native-search-header';
 import {withNavigation} from 'react-navigation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +15,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
 
 const phoneFontScale = PixelRatio.getFontScale();
@@ -29,6 +29,7 @@ const List = ({navigation}) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchText, setSearchText] = React.useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchAPIData = async () => {
     try {
@@ -147,7 +148,6 @@ const List = ({navigation}) => {
     }
 
     setSelectedTags(newSelectedTags);
-    // console.warn(newSelectedTags);
 
     if (newSelectedTags.length > 0) {
       const filteredItems = lyrics.filter(item => {
@@ -160,6 +160,7 @@ const List = ({navigation}) => {
       setFilteredLyrics([]);
     }
   };
+
   const filterData = text => {
     if (text) {
       const filteredItems = lyrics.filter(
@@ -188,25 +189,24 @@ const List = ({navigation}) => {
         },
       ]}
       onPress={() => handleTagPress(item.name)}>
-      <Text
-        style={[
-          styles.chipText,
-          // {
-          //   color: selectedTags.includes(item.name) ? '#9C27B0' : '#673AB7',
-          // },
-        ]}>
-        {item.name}
-      </Text>
+      <Text style={styles.chipText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
-  if (isLoading) {
-    return (
-      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-        <ActivityIndicator size="large" color="red" />
-      </View>
-    );
-  }
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const [apiData, storedData, storedTags] = await Promise.all([
+      fetchAPIData(),
+      fetchStoredData(),
+      fetchStoredTags(),
+    ]);
+    const jsonData = apiData.length > 0 ? apiData : storedData;
+    const tagsData = storedTags.length > 0 ? storedTags : [];
+    setLyrics(jsonData);
+    setTags(tagsData);
+    setFilteredLyrics([]);
+    setRefreshing(false);
+  };
 
   const renderListItem = ({item}) => (
     <Pressable
@@ -257,18 +257,13 @@ const List = ({navigation}) => {
   );
 
   const renderEmptyList = () => (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-      <Text style={{fontSize: 16, fontWeight: 'bold'}}>No data available</Text>
+    <View style={styles.emptyListContainer}>
+      <Text style={styles.emptyListText}>No data available</Text>
     </View>
   );
 
   return (
-    <View style={{flex: 1}}>
+    <View>
       <SafeAreaView>
         <SearchHeader
           ref={searchHeaderRef}
@@ -292,30 +287,32 @@ const List = ({navigation}) => {
           onSearch={event => {
             handleSearch(event.nativeEvent.text);
           }}
-          style={{
-            header: {
-              height: 55,
-              backgroundColor: `#fdfdfd`,
-            },
-          }}
+          style={styles.searchHeader}
         />
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={{marginTop: header ? 0 : 55}}
+          style={styles.tagsContainer}
           data={tags}
           renderItem={renderTags}
           keyExtractor={item => item.id.toString()}
         />
         <FlatList
           data={
-            searchText === '' && selectedTags.length == 0
+            searchText === '' && selectedTags.length === 0
               ? lyrics.sort((a, b) => a.numbering - b.numbering)
               : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
           }
           renderItem={renderListItem}
           keyExtractor={item => item.id.toString()}
           ListEmptyComponent={renderEmptyList}
+          refreshControl={
+            <RefreshControl
+              tintColor="#673AB7"
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
         />
       </SafeAreaView>
     </View>
@@ -323,6 +320,19 @@ const List = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  searchHeader: {
+    header: {
+      height: 55,
+      backgroundColor: '#fdfdfd',
+    },
+  },
+  tagsContainer: {
+    marginTop: 0,
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -341,6 +351,16 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
     fontWeight: 'bold',
     color: '#673AB7',
+  },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyListText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: '70%',
   },
 });
 

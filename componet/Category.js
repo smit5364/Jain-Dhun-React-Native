@@ -86,21 +86,18 @@ const SingleRow = props => {
   return (
     <View style={{flex: 1}}>
       <Card containerStyle={[styles.cardStyle, {height: '100%'}]}>
-        <View style={[styles.cardHeadingStyle, {flex: 1}]}>
+        <View style={[styles.cardHeadingStyle]}>
           <Text style={styles.cardHeadingTextStyle}>{props.title}</Text>
           <Text style={{color: '#228B22'}} onPress={() => alert('MORE')}>
             MORE
           </Text>
         </View>
-        <View style={{flexDirection: 'row', width: '100%'}}>
+        <View style={{flexDirection: 'row', marginVertical: 5, width: '100%'}}>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             {slides.map((item, key) => (
               <View
                 style={{
                   margin: 5,
-                  borderColor: 'black',
-                  borderWidth: 1,
-                  backgroundColor: item.backgroundColor,
                 }}>
                 <Image
                   source={{
