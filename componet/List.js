@@ -4,7 +4,9 @@ import firestore from '@react-native-firebase/firestore';
 import React, {useEffect, useState, useLayoutEffect} from 'react';
 import SearchHeader from 'react-native-search-header';
 import {withNavigation} from 'react-navigation';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +18,8 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 const phoneFontScale = PixelRatio.getFontScale();
@@ -244,9 +248,13 @@ const List = ({navigation}) => {
             <Text
               style={{
                 marginRight: 20,
+                borderStyle: 'dashed',
+                borderColor: '#673ab7',
+                borderWidth: timeDiff >= 0 && timeDiff < 7 ? 2 : 0,
                 backgroundColor:
                   timeDiff >= 0 && timeDiff < 7 ? '#FFC107' : '#673AB7',
-                color: '#fff',
+                color: timeDiff >= 0 && timeDiff < 7 ? '#673AB7' : '#fff',
+                paddingLeft: timeDiff >= 0 && timeDiff < 7 ? 20 : 16,
                 paddingHorizontal: 16,
                 paddingTop: 10,
                 flex: 1,
@@ -296,60 +304,76 @@ const List = ({navigation}) => {
   // Concatenate the filtered lyrics with the remaining lyrics
   const mergedLyrics = [...filteredLyric, ...remainingLyrics];
 
+  const dismissKeyboard = () => {
+    if (searchHeaderRef.current) {
+      searchHeaderRef.current.hide();
+    }
+  };
+
   return (
-    <View>
-      <SafeAreaView>
-        <SearchHeader
-          ref={searchHeaderRef}
-          placeholder="Search..."
-          placeholderColor="gray"
-          autoFocus={true}
-          dropShadowed={true}
-          visibleInitially={false}
-          persistent={false}
-          enableSuggestion={false}
-          entryAnimation="from-right-side"
-          topOffset={1}
-          iconColor="#673AB7"
-          onHide={event => {
-            setHeader(true);
-            setSearchText('');
-          }}
-          onEnteringSearch={event => {
-            handleSearch(event.nativeEvent.text);
-          }}
-          onSearch={event => {
-            handleSearch(event.nativeEvent.text);
-          }}
-          style={styles.searchHeader}
-        />
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tagsContainer}
-          data={tags}
-          renderItem={renderTags}
-          keyExtractor={item => item.id.toString()}
-        />
-        <FlatList
-          data={
-            searchText === '' && selectedTags.length === 0
-              ? mergedLyrics
-              : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
-          }
-          renderItem={renderListItem}
-          keyExtractor={item => item.id.toString()}
-          ListEmptyComponent={renderEmptyList}
-          refreshControl={
-            <RefreshControl
-              tintColor="#673AB7"
-              refreshing={refreshing}
-              onRefresh={onRefresh}
+    <KeyboardAwareScrollView
+      resetScrollToCoords={{x: 0, y: 0}}
+      scrollEnabled={false}>
+      <View>
+        <SafeAreaView>
+          <View>
+            <SearchHeader
+              ref={searchHeaderRef}
+              placeholder="Search..."
+              placeholderColor="gray"
+              autoFocus={true}
+              dropShadowed={true}
+              visibleInitially={false}
+              persistent={false}
+              enableSuggestion={false}
+              entryAnimation="from-right-side"
+              topOffset={1}
+              iconColor="#673AB7"
+              onHide={event => {
+                setHeader(true);
+              }}
+              onEnteringSearch={event => {
+                handleSearch(event.nativeEvent.text);
+              }}
+              onSearch={event => {
+                handleSearch(event.nativeEvent.text);
+              }}
+              style={styles.searchHeader}
             />
-          }
-        />
-      </SafeAreaView>
-    </View>
+          </View>
+          <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <View>
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{marginTop: header ? 0 : 55}}
+                data={tags}
+                renderItem={renderTags}
+                keyExtractor={item => item.id.toString()}
+              />
+              <FlatList
+                scrollEnabled={false}
+                data={
+                  searchText === '' && selectedTags.length === 0
+                    ? mergedLyrics
+                    : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
+                }
+                renderItem={renderListItem}
+                keyExtractor={item => item.id.toString()}
+                ListEmptyComponent={renderEmptyList}
+                refreshControl={
+                  <RefreshControl
+                    tintColor="#673AB7"
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        </SafeAreaView>
+      </View>
+    </KeyboardAwareScrollView>
   );
 };
 

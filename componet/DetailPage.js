@@ -58,7 +58,13 @@ const DetailPage = ({route, navigation}) => {
     <View style={{height: '100%'}}>
       <ScrollView>
         <View style={{padding: 20}}>
-          <Text style={{fontSize: 16, marginBottom: 10}}>hey: </Text>
+          <Text
+            style={{
+              fontSize: item.artist ? 16 : 0,
+              marginBottom: item.artist ? 10 : 0,
+            }}>
+            {item.artist ? 'Artist :' : null} {item.artist}{' '}
+          </Text>
           <View style={{padding: 0}}>
             <Text style={{fontSize: 16, textAlign: 'justify', color: '#000'}}>
               {item.content}
