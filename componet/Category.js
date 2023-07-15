@@ -18,13 +18,12 @@ const Stack = createNativeStackNavigator();
 
 const CategoryDisplay = () => {
   return (
-    <View
-      style={{
-        flex: 1,
-      }}>
-      <SingleRow title="Tags" />
-      <SingleRow title="24 Tirthenkar" />
-      <SingleRow title="Artist" />
+    <View style={{}}>
+      <ScrollView>
+        <SingleRow title="Tags" />
+        <SingleRow title="24 Tirthenkar" />
+        <SingleRow title="Artist" />
+      </ScrollView>
     </View>
   );
 };

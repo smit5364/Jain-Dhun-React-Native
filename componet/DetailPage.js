@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, Text, View} from 'react-native';
+import {ScrollView, Text, View, Linking} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {FAB} from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -48,13 +48,17 @@ const DetailPage = ({route, navigation}) => {
     }
   };
 
+  const videoUrl = item.youtube;
+
+  const openYouTubeApp = () => {
+    Linking.openURL(videoUrl);
+  };
+
   return (
     <View style={{height: '100%'}}>
       <ScrollView>
         <View style={{padding: 20}}>
-          <Text style={{fontSize: 16, marginBottom: 10}}>
-            Artist: {item.artist}
-          </Text>
+          <Text style={{fontSize: 16, marginBottom: 10}}>hey: </Text>
           <View style={{padding: 0}}>
             <Text style={{fontSize: 16, textAlign: 'justify', color: '#000'}}>
               {item.content}
@@ -62,6 +66,17 @@ const DetailPage = ({route, navigation}) => {
           </View>
         </View>
       </ScrollView>
+      {item.youtube ? (
+        <FAB
+          icon={() => (
+            <MaterialCommunityIcons name="youtube" color="#fff" size={25} />
+          )}
+          color="#673AB7"
+          placement="right"
+          style={{marginRight: 82}}
+          onPress={openYouTubeApp}
+        />
+      ) : null}
       <FAB
         icon={() => (
           <MaterialCommunityIcons

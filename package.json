@@ -30,6 +30,7 @@
     "@react-navigation/native-stack": "^6.9.13",
     "link": "^1.5.1",
     "lodash": "^4.17.21",
+    "moment": "^2.29.4",
     "react": "18.2.0",
     "react-native": "^0.72.1",
     "react-native-androw": "^0.0.34",

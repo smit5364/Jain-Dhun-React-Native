@@ -208,59 +208,93 @@ const List = ({navigation}) => {
     setRefreshing(false);
   };
 
-  const renderListItem = ({item}) => (
-    <Pressable
-      onPress={() => {
-        navigation.navigate('Details', {item});
-        setSearchText('');
-        setHeader(true);
-        searchHeaderRef.current.hide();
-      }}
-      style={{marginHorizontal: 5}}>
-      <View
-        key={item.id}
-        style={{
-          borderBottomColor: 'rgba(0,0,0,0.2)',
-          borderBottomWidth: 1,
-          padding: 10,
-          height: 70,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <View style={{height: 40}}>
-          <Text
-            style={{
-              marginRight: 20,
-              backgroundColor: '#673AB7',
-              color: '#fff',
-              paddingHorizontal: 16,
-              paddingTop: 10,
-              flex: 1,
-              fontWeight: 'bold',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-            }}>
-            {item.numbering}
-          </Text>
+  const renderListItem = ({item}) => {
+    const {id, numbering, title, content, publishDate} = item;
+
+    // Calculate the time difference in days between the publish date and today
+    const currentDate = new Date();
+    const publishDateTime = publishDate.toDate(); // assuming publishDate is a Firebase Timestamp
+    const timeDiff = Math.ceil(
+      (currentDate - publishDateTime) / (1000 * 60 * 60 * 24),
+    );
+
+    // Define the numbering based on the time difference
+    let numberingText = timeDiff >= 0 && timeDiff < 7 ? 'NEW' : numbering;
+
+    return (
+      <Pressable
+        onPress={() => {
+          navigation.navigate('Details', {item});
+          setSearchText('');
+          setHeader(true);
+          searchHeaderRef.current.hide();
+        }}
+        style={{marginHorizontal: 5}}>
+        <View
+          key={id}
+          style={{
+            borderBottomColor: 'rgba(0,0,0,0.2)',
+            borderBottomWidth: 1,
+            padding: 10,
+            height: 70,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <View style={{height: 40}}>
+            <Text
+              style={{
+                marginRight: 20,
+                backgroundColor:
+                  timeDiff >= 0 && timeDiff < 7 ? '#FFC107' : '#673AB7',
+                color: '#fff',
+                paddingHorizontal: 16,
+                paddingTop: 10,
+                flex: 1,
+                fontWeight: 'bold',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 20,
+              }}>
+              {numberingText}
+            </Text>
+          </View>
+          <View style={{flex: 1}}>
+            <Text style={{fontWeight: 'bold', fontSize: 16 * phoneFontScale}}>
+              {title}
+            </Text>
+            <Text style={{fontSize: 14 * phoneFontScale}}>
+              {content.split('\n')[0]}
+            </Text>
+          </View>
         </View>
-        <View style={{flex: 1}}>
-          <Text style={{fontWeight: 'bold', fontSize: 16 * phoneFontScale}}>
-            {item.title}
-          </Text>
-          <Text style={{fontSize: 14 * phoneFontScale}}>
-            {item.content.split('\n')[0]}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
+      </Pressable>
+    );
+  };
 
   const renderEmptyList = () => (
     <View style={styles.emptyListContainer}>
       <Text style={styles.emptyListText}>No data available</Text>
     </View>
   );
+  const currentDate = new Date();
+  const sortedLyrics = lyrics.sort((a, b) => a.numbering - b.numbering); // Sort by numbering
+
+  // Filter the lyrics based on publish date within 7 days and numbering
+  const filteredLyric = sortedLyrics.filter(item => {
+    const publishDateTime = item.publishDate.toDate(); // assuming publishDate is a Firebase Timestamp
+    const timeDiff = Math.ceil(
+      (currentDate - publishDateTime) / (1000 * 60 * 60 * 24),
+    );
+    return timeDiff >= 0 && timeDiff < 7;
+  });
+
+  // Filter the remaining lyrics based on numbering
+  const remainingLyrics = sortedLyrics.filter(
+    item => !filteredLyric.includes(item),
+  );
+
+  // Concatenate the filtered lyrics with the remaining lyrics
+  const mergedLyrics = [...filteredLyric, ...remainingLyrics];
 
   return (
     <View>
@@ -300,7 +334,7 @@ const List = ({navigation}) => {
         <FlatList
           data={
             searchText === '' && selectedTags.length === 0
-              ? lyrics.sort((a, b) => a.numbering - b.numbering)
+              ? mergedLyrics
               : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
           }
           renderItem={renderListItem}
@@ -348,6 +382,7 @@ const styles = StyleSheet.create({
   chipText: {
     padding: 8,
     fontSize: 13,
+    height: 36,
     textTransform: 'capitalize',
     fontWeight: 'bold',
     color: '#673AB7',
