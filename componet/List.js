@@ -4,6 +4,7 @@ import firestore from '@react-native-firebase/firestore';
 import React, {useEffect, useState, useLayoutEffect} from 'react';
 import SearchHeader from 'react-native-search-header';
 import {withNavigation} from 'react-navigation';
+
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -279,11 +280,26 @@ const List = ({navigation}) => {
     );
   };
 
-  const renderEmptyList = () => (
-    <View style={styles.emptyListContainer}>
-      <Text style={styles.emptyListText}>No data available</Text>
-    </View>
-  );
+  const renderEmptyList = () => {
+    if (isLoading) {
+      // Render the activity indicator while data is being fetched
+      return (
+        <View style={styles.emptyListContainer}>
+          <View style={styles.emptyListText}>
+            <ActivityIndicator size={'large'} color={'#673AB7'} />
+          </View>
+        </View>
+      );
+    } else {
+      // Render the message when there is no data available
+      return (
+        <View style={styles.emptyListContainer}>
+          <Text style={styles.emptyListText}>No data available</Text>
+        </View>
+      );
+    }
+  };
+
   const currentDate = new Date();
   const sortedLyrics = lyrics.sort((a, b) => a.numbering - b.numbering); // Sort by numbering
 

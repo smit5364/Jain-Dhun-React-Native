@@ -1,15 +1,27 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, Text, View, Linking} from 'react-native';
+import {ScrollView, Text, View, Linking, ToastAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {FAB} from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import CustomMaterialMenu from './CustomMaterialMenu';
 const DetailPage = ({route, navigation}) => {
   const {item} = route.params;
   const [isSaved, setIsSaved] = useState(false);
 
   React.useLayoutEffect(() => {
-    navigation.setOptions({title: `${item.numbering}. ${item.title}`});
+    navigation.setOptions({
+      title: `${item.numbering}. ${item.title}`,
+      headerRight: () => (
+        <CustomMaterialMenu
+          menuText="Menu"
+          textStyle={{color: 'white'}}
+          navigation={navigation}
+          item={item}
+          route={route}
+          isIcon={true}
+        />
+      ),
+    });
   }, [navigation, item.title]);
 
   useEffect(() => {
@@ -40,6 +52,11 @@ const DetailPage = ({route, navigation}) => {
         savedLyrics = savedLyrics.filter(lyric => lyric.id !== item.id);
       } else {
         savedLyrics.push(item);
+        ToastAndroid.showWithGravity(
+          'Lyrics Has Been Saved',
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM,
+        );
       }
 
       await AsyncStorage.setItem('saved', JSON.stringify(savedLyrics));
@@ -79,7 +96,7 @@ const DetailPage = ({route, navigation}) => {
           )}
           color="#673AB7"
           placement="right"
-          style={{marginRight: 82}}
+          style={{marginRight: 82, borderRadius: 50}}
           onPress={openYouTubeApp}
         />
       ) : null}
