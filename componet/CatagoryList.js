@@ -25,7 +25,9 @@ import {
 
 const phoneFontScale = PixelRatio.getFontScale();
 
-const List = ({navigation}) => {
+const CatagoryList = ({route, navigation}) => {
+  const {collection} = route.params;
+  const {collectionDisplayName} = route.params;
   const searchHeaderRef = React.useRef(null);
   const [header, setHeader] = useState(true);
   const [lyrics, setLyrics] = useState([]);
@@ -38,22 +40,13 @@ const List = ({navigation}) => {
 
   const fetchAPIData = async () => {
     try {
-      const querySnapshot = await firestore().collection('lyrics').get();
+      const querySnapshot = await firestore().collection(collection).get();
       const jsonData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
       const jsonString = JSON.stringify(jsonData);
-      await AsyncStorage.setItem('data', jsonString);
-
-      // Fetch tags separately
-      const tagsQuerySnapshot = await firestore().collection('tags').get();
-      const tagsData = tagsQuerySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const tagsJsonString = JSON.stringify(tagsData);
-      await AsyncStorage.setItem('tags', tagsJsonString);
+      await AsyncStorage.setItem(collection, jsonString);
 
       return jsonData;
     } catch (error) {
@@ -64,8 +57,7 @@ const List = ({navigation}) => {
 
   const fetchStoredData = async () => {
     try {
-      const storedData = await AsyncStorage.getItem('data');
-      const storedTags = await AsyncStorage.getItem('tags');
+      const storedData = await AsyncStorage.getItem(collection);
       return storedData !== null ? JSON.parse(storedData) : [];
     } catch (error) {
       console.error(error);
@@ -90,12 +82,35 @@ const List = ({navigation}) => {
         const [apiData, storedData, storedTags] = await Promise.all([
           fetchAPIData(),
           fetchStoredData(),
-          fetchStoredTags(),
         ]);
         const jsonData = apiData.length > 0 ? apiData : storedData;
-        const tagsData = storedTags.length > 0 ? storedTags : [];
         setLyrics(jsonData);
-        setTags(tagsData); // Add this line to set the tags state
+        setTags([
+          {id: 1, name: 'Rishabhanatha', displayName: 'ઋષભનાથ'},
+          {id: 2, name: 'Ajitanatha', displayName: 'અજિતનાથ'},
+          {id: 3, name: 'Sambhavanatha', displayName: 'સંભવનાથ'},
+          {id: 4, name: 'Abhinandananatha', displayName: 'અભિનંદનાથ'},
+          {id: 5, name: 'Sumatinatha', displayName: 'સુમતિનાથ'},
+          {id: 6, name: 'Padmaprabha', displayName: 'પદ્મપ્રભ'},
+          {id: 7, name: 'Suparshvanatha', displayName: 'સુપર્શ્વનાથ'},
+          {id: 8, name: 'Chandraprabha', displayName: 'ચંદ્રપ્રભ'},
+          {id: 9, name: 'Pushpadanta', displayName: 'પુષ્પદંત'},
+          {id: 10, name: 'Shitalanatha', displayName: 'શીતલનાથ'},
+          {id: 11, name: 'Shreyanasanatha', displayName: 'શ્રેયાંશનાથ'},
+          {id: 12, name: 'Vasupujya', displayName: 'વાસુપૂજ્ય'},
+          {id: 13, name: 'Vimalanatha', displayName: 'વિમલનાથ'},
+          {id: 14, name: 'Anantanatha', displayName: 'અનંતનાથ'},
+          {id: 15, name: 'Dharmanatha', displayName: 'ધર્મનાથ'},
+          {id: 16, name: 'Shantinatha', displayName: 'શાંતિનાથ'},
+          {id: 17, name: 'Kunthunatha', displayName: 'કુંથુનાથ'},
+          {id: 18, name: 'Aranatha', displayName: 'આરનાથ'},
+          {id: 19, name: 'Mallinatha', displayName: 'મલ્લિનાથ'},
+          {id: 20, name: 'Munisuvrata', displayName: 'મુનિસુવ્રત'},
+          {id: 21, name: 'Naminatha', displayName: 'નમિનાથ'},
+          {id: 22, name: 'Neminatha', displayName: 'નેમિનાથ'},
+          {id: 23, name: 'Parshvanatha', displayName: 'પાર્શ્વનાથ'},
+          {id: 24, name: 'Mahavira', displayName: 'મહાવીર'},
+        ]); // Add this line to set the tags state
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -139,6 +154,7 @@ const List = ({navigation}) => {
           size={26}
         />
       ),
+      title: collectionDisplayName,
       headerShown: header,
     });
   }, [navigation, header]);
@@ -194,7 +210,7 @@ const List = ({navigation}) => {
         },
       ]}
       onPress={() => handleTagPress(item.name)}>
-      <Text style={styles.chipText}>{item.name}</Text>
+      <Text style={styles.chipText}>{item.displayName}</Text>
     </TouchableOpacity>
   );
 
@@ -208,7 +224,6 @@ const List = ({navigation}) => {
     const jsonData = apiData.length > 0 ? apiData : storedData;
     const tagsData = storedTags.length > 0 ? storedTags : [];
     setLyrics(jsonData);
-    setTags(tagsData);
     setFilteredLyrics([]);
     setRefreshing(false);
   };
@@ -439,4 +454,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withNavigation(List);
+export default withNavigation(CatagoryList);

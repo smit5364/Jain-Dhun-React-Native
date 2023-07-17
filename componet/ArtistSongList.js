@@ -25,7 +25,8 @@ import {
 
 const phoneFontScale = PixelRatio.getFontScale();
 
-const List = ({navigation}) => {
+const ArtistSongList = ({route, navigation}) => {
+  const {artist} = route.params;
   const searchHeaderRef = React.useRef(null);
   const [header, setHeader] = useState(true);
   const [lyrics, setLyrics] = useState([]);
@@ -213,6 +214,12 @@ const List = ({navigation}) => {
     setRefreshing(false);
   };
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      title: artist,
+    });
+  }, [navigation, artist]);
+
   const renderListItem = ({item}) => {
     const {id, numbering, title, content, publishDate} = item;
 
@@ -225,6 +232,10 @@ const List = ({navigation}) => {
 
     // Define the numbering based on the time difference
     let numberingText = timeDiff >= 0 && timeDiff < 7 ? 'NEW' : numbering;
+
+    if (item.artist.toLowerCase() !== artist.toLowerCase()) {
+      return null; // Skip rendering if the artist's name doesn't match
+    }
 
     return (
       <Pressable
@@ -439,4 +450,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withNavigation(List);
+export default withNavigation(ArtistSongList);
