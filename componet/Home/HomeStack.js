@@ -1,7 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 
-import DetailPage from './DetailPage';
+import DetailPage from '../common/DetailPage';
 import List from './List';
 const Stack = createNativeStackNavigator();
 

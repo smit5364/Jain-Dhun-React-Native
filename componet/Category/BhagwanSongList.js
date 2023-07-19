@@ -25,7 +25,9 @@ import {
 
 const phoneFontScale = PixelRatio.getFontScale();
 
-const List = ({navigation}) => {
+const BhagwanSongList = ({route, navigation}) => {
+  const {bhagwan} = route.params;
+  const {bhagwanDisplay} = route.params;
   const searchHeaderRef = React.useRef(null);
   const [header, setHeader] = useState(true);
   const [lyrics, setLyrics] = useState([]);
@@ -191,6 +193,7 @@ const List = ({navigation}) => {
           backgroundColor: selectedTags.includes(item.name)
             ? '#FFC107'
             : '#fff',
+          height: 40,
         },
       ]}
       onPress={() => handleTagPress(item.name)}>
@@ -213,8 +216,14 @@ const List = ({navigation}) => {
     setRefreshing(false);
   };
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      title: bhagwanDisplay,
+    });
+  }, [navigation, bhagwan]);
+
   const renderListItem = ({item}) => {
-    const {id, numbering, title, content, publishDate} = item;
+    const {id, numbering, title, content, publishDate, newFlag} = item;
 
     // Calculate the time difference in days between the publish date and today
     const currentDate = new Date();
@@ -224,7 +233,14 @@ const List = ({navigation}) => {
     );
 
     // Define the numbering based on the time difference
-    let numberingText = timeDiff >= 0 && timeDiff < 7 ? 'NEW' : numbering;
+    let numberingText =
+      newFlag && timeDiff >= 0 && timeDiff < 7 ? 'NEW' : numbering;
+
+    if (
+      !item.tags.some(tag => tag.toLowerCase().includes(bhagwan.toLowerCase()))
+    ) {
+      return null; // Skip rendering if the bhagwan's name doesn't match
+    }
 
     return (
       <Pressable
@@ -251,11 +267,14 @@ const List = ({navigation}) => {
                 marginRight: 20,
                 borderStyle: 'dashed',
                 borderColor: '#673ab7',
-                borderWidth: timeDiff >= 0 && timeDiff < 7 ? 2 : 0,
+                borderWidth: newFlag && timeDiff >= 0 && timeDiff < 7 ? 2 : 0,
                 backgroundColor:
-                  timeDiff >= 0 && timeDiff < 7 ? '#FFC107' : '#673AB7',
-                color: timeDiff >= 0 && timeDiff < 7 ? '#673AB7' : '#fff',
-                paddingLeft: timeDiff >= 0 && timeDiff < 7 ? 20 : 16,
+                  newFlag && timeDiff >= 0 && timeDiff < 7
+                    ? '#FFC107'
+                    : '#673AB7',
+                color:
+                  newFlag && timeDiff >= 0 && timeDiff < 7 ? '#673AB7' : '#fff',
+                paddingLeft: newFlag && timeDiff >= 0 && timeDiff < 7 ? 20 : 16,
                 paddingHorizontal: 16,
                 paddingTop: 10,
                 flex: 1,
@@ -309,7 +328,8 @@ const List = ({navigation}) => {
     const timeDiff = Math.ceil(
       (currentDate - publishDateTime) / (1000 * 60 * 60 * 24),
     );
-    return timeDiff >= 0 && timeDiff < 7;
+    const newFlag = item.newFlag;
+    return newFlag && timeDiff >= 0 && timeDiff < 7;
   });
 
   // Filter the remaining lyrics based on numbering
@@ -320,76 +340,60 @@ const List = ({navigation}) => {
   // Concatenate the filtered lyrics with the remaining lyrics
   const mergedLyrics = [...filteredLyric, ...remainingLyrics];
 
-  const dismissKeyboard = () => {
-    if (searchHeaderRef.current) {
-      searchHeaderRef.current.hide();
-    }
-  };
-
   return (
-    <KeyboardAwareScrollView
-      resetScrollToCoords={{x: 0, y: 0}}
-      scrollEnabled={true}>
+    <SafeAreaView>
       <View>
-        <SafeAreaView>
-          <View>
-            <SearchHeader
-              ref={searchHeaderRef}
-              placeholder="Search..."
-              placeholderColor="gray"
-              autoFocus={true}
-              dropShadowed={true}
-              visibleInitially={false}
-              persistent={false}
-              enableSuggestion={false}
-              entryAnimation="from-right-side"
-              topOffset={1}
-              iconColor="#673AB7"
-              onHide={event => {
-                setHeader(true);
-              }}
-              onEnteringSearch={event => {
-                handleSearch(event.nativeEvent.text);
-              }}
-              onSearch={event => {
-                handleSearch(event.nativeEvent.text);
-              }}
-              style={styles.searchHeader}
-            />
-          </View>
-          <TouchableWithoutFeedback onPress={dismissKeyboard}>
-            <View>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{marginTop: header ? 0 : 55}}
-                data={tags}
-                renderItem={renderTags}
-                keyExtractor={item => item.id.toString()}
-              />
-              <FlatList
-                scrollEnabled={false}
-                data={
-                  searchText === '' && selectedTags.length === 0
-                    ? mergedLyrics
-                    : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
-                }
-                renderItem={renderListItem}
-                keyExtractor={item => item.id.toString()}
-                ListEmptyComponent={renderEmptyList}
-                refreshControl={
-                  <RefreshControl
-                    tintColor="#673AB7"
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                  />
-                }
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </SafeAreaView>
+        <SearchHeader
+          ref={searchHeaderRef}
+          placeholder="Search..."
+          placeholderColor="gray"
+          autoFocus={true}
+          dropShadowed={true}
+          visibleInitially={false}
+          persistent={false}
+          enableSuggestion={false}
+          entryAnimation="from-right-side"
+          topOffset={1}
+          iconColor="#673AB7"
+          onHide={event => {
+            setHeader(true);
+          }}
+          onEnteringSearch={event => {
+            handleSearch(event.nativeEvent.text);
+          }}
+          onSearch={event => {
+            handleSearch(event.nativeEvent.text);
+          }}
+          style={styles.searchHeader}
+        />
       </View>
-    </KeyboardAwareScrollView>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{marginTop: header ? 0 : 55}}
+        data={tags}
+        renderItem={renderTags}
+        keyExtractor={item => item.id.toString()}
+      />
+      <FlatList
+        scrollEnabled={false}
+        data={
+          searchText === '' && selectedTags.length === 0
+            ? mergedLyrics
+            : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
+        }
+        renderItem={renderListItem}
+        keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={renderEmptyList}
+        refreshControl={
+          <RefreshControl
+            tintColor="#673AB7"
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      />
+    </SafeAreaView>
   );
 };
 
@@ -435,8 +439,7 @@ const styles = StyleSheet.create({
   emptyListText: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginVertical: '70%',
   },
 });
 
-export default withNavigation(List);
+export default withNavigation(BhagwanSongList);

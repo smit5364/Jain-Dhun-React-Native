@@ -25,8 +25,9 @@ import {
 
 const phoneFontScale = PixelRatio.getFontScale();
 
-const ArtistSongList = ({route, navigation}) => {
-  const {artist} = route.params;
+const CatagoryList = ({route, navigation}) => {
+  const {collection} = route.params;
+  const {collectionDisplayName} = route.params;
   const searchHeaderRef = React.useRef(null);
   const [header, setHeader] = useState(true);
   const [lyrics, setLyrics] = useState([]);
@@ -39,22 +40,13 @@ const ArtistSongList = ({route, navigation}) => {
 
   const fetchAPIData = async () => {
     try {
-      const querySnapshot = await firestore().collection('lyrics').get();
+      const querySnapshot = await firestore().collection(collection).get();
       const jsonData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
       const jsonString = JSON.stringify(jsonData);
-      await AsyncStorage.setItem('data', jsonString);
-
-      // Fetch tags separately
-      const tagsQuerySnapshot = await firestore().collection('tags').get();
-      const tagsData = tagsQuerySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const tagsJsonString = JSON.stringify(tagsData);
-      await AsyncStorage.setItem('tags', tagsJsonString);
+      await AsyncStorage.setItem(collection, jsonString);
 
       return jsonData;
     } catch (error) {
@@ -65,8 +57,7 @@ const ArtistSongList = ({route, navigation}) => {
 
   const fetchStoredData = async () => {
     try {
-      const storedData = await AsyncStorage.getItem('data');
-      const storedTags = await AsyncStorage.getItem('tags');
+      const storedData = await AsyncStorage.getItem(collection);
       return storedData !== null ? JSON.parse(storedData) : [];
     } catch (error) {
       console.error(error);
@@ -91,12 +82,35 @@ const ArtistSongList = ({route, navigation}) => {
         const [apiData, storedData, storedTags] = await Promise.all([
           fetchAPIData(),
           fetchStoredData(),
-          fetchStoredTags(),
         ]);
         const jsonData = apiData.length > 0 ? apiData : storedData;
-        const tagsData = storedTags.length > 0 ? storedTags : [];
         setLyrics(jsonData);
-        setTags(tagsData); // Add this line to set the tags state
+        setTags([
+          {id: 1, name: 'Rishabhanatha', displayName: 'ઋષભનાથ'},
+          {id: 2, name: 'Ajitanatha', displayName: 'અજિતનાથ'},
+          {id: 3, name: 'Sambhavanatha', displayName: 'સંભવનાથ'},
+          {id: 4, name: 'Abhinandananatha', displayName: 'અભિનંદનાથ'},
+          {id: 5, name: 'Sumatinatha', displayName: 'સુમતિનાથ'},
+          {id: 6, name: 'Padmaprabha', displayName: 'પદ્મપ્રભ'},
+          {id: 7, name: 'Suparshvanatha', displayName: 'સુપર્શ્વનાથ'},
+          {id: 8, name: 'Chandraprabha', displayName: 'ચંદ્રપ્રભ'},
+          {id: 9, name: 'Pushpadanta', displayName: 'પુષ્પદંત'},
+          {id: 10, name: 'Shitalanatha', displayName: 'શીતલનાથ'},
+          {id: 11, name: 'Shreyanasanatha', displayName: 'શ્રેયાંશનાથ'},
+          {id: 12, name: 'Vasupujya', displayName: 'વાસુપૂજ્ય'},
+          {id: 13, name: 'Vimalanatha', displayName: 'વિમલનાથ'},
+          {id: 14, name: 'Anantanatha', displayName: 'અનંતનાથ'},
+          {id: 15, name: 'Dharmanatha', displayName: 'ધર્મનાથ'},
+          {id: 16, name: 'Shantinatha', displayName: 'શાંતિનાથ'},
+          {id: 17, name: 'Kunthunatha', displayName: 'કુંથુનાથ'},
+          {id: 18, name: 'Aranatha', displayName: 'આરનાથ'},
+          {id: 19, name: 'Mallinatha', displayName: 'મલ્લિનાથ'},
+          {id: 20, name: 'Munisuvrata', displayName: 'મુનિસુવ્રત'},
+          {id: 21, name: 'Naminatha', displayName: 'નમિનાથ'},
+          {id: 22, name: 'Neminatha', displayName: 'નેમિનાથ'},
+          {id: 23, name: 'Parshvanatha', displayName: 'પાર્શ્વનાથ'},
+          {id: 24, name: 'Mahavira', displayName: 'મહાવીર'},
+        ]); // Add this line to set the tags state
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -140,6 +154,7 @@ const ArtistSongList = ({route, navigation}) => {
           size={26}
         />
       ),
+      title: collectionDisplayName,
       headerShown: header,
     });
   }, [navigation, header]);
@@ -192,10 +207,11 @@ const ArtistSongList = ({route, navigation}) => {
           backgroundColor: selectedTags.includes(item.name)
             ? '#FFC107'
             : '#fff',
+          height: 40,
         },
       ]}
       onPress={() => handleTagPress(item.name)}>
-      <Text style={styles.chipText}>{item.name}</Text>
+      <Text style={styles.chipText}>{item.displayName}</Text>
     </TouchableOpacity>
   );
 
@@ -209,19 +225,12 @@ const ArtistSongList = ({route, navigation}) => {
     const jsonData = apiData.length > 0 ? apiData : storedData;
     const tagsData = storedTags.length > 0 ? storedTags : [];
     setLyrics(jsonData);
-    setTags(tagsData);
     setFilteredLyrics([]);
     setRefreshing(false);
   };
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      title: artist,
-    });
-  }, [navigation, artist]);
-
   const renderListItem = ({item}) => {
-    const {id, numbering, title, content, publishDate} = item;
+    const {id, numbering, title, content, publishDate, newFlag} = item;
 
     // Calculate the time difference in days between the publish date and today
     const currentDate = new Date();
@@ -231,11 +240,8 @@ const ArtistSongList = ({route, navigation}) => {
     );
 
     // Define the numbering based on the time difference
-    let numberingText = timeDiff >= 0 && timeDiff < 7 ? 'NEW' : numbering;
-
-    if (item.artist.toLowerCase() !== artist.toLowerCase()) {
-      return null; // Skip rendering if the artist's name doesn't match
-    }
+    let numberingText =
+      newFlag && timeDiff >= 0 && timeDiff < 7 ? 'NEW' : numbering;
 
     return (
       <Pressable
@@ -262,11 +268,14 @@ const ArtistSongList = ({route, navigation}) => {
                 marginRight: 20,
                 borderStyle: 'dashed',
                 borderColor: '#673ab7',
-                borderWidth: timeDiff >= 0 && timeDiff < 7 ? 2 : 0,
+                borderWidth: newFlag && timeDiff >= 0 && timeDiff < 7 ? 2 : 0,
                 backgroundColor:
-                  timeDiff >= 0 && timeDiff < 7 ? '#FFC107' : '#673AB7',
-                color: timeDiff >= 0 && timeDiff < 7 ? '#673AB7' : '#fff',
-                paddingLeft: timeDiff >= 0 && timeDiff < 7 ? 20 : 16,
+                  newFlag && timeDiff >= 0 && timeDiff < 7
+                    ? '#FFC107'
+                    : '#673AB7',
+                color:
+                  newFlag && timeDiff >= 0 && timeDiff < 7 ? '#673AB7' : '#fff',
+                paddingLeft: newFlag && timeDiff >= 0 && timeDiff < 7 ? 20 : 16,
                 paddingHorizontal: 16,
                 paddingTop: 10,
                 flex: 1,
@@ -320,7 +329,8 @@ const ArtistSongList = ({route, navigation}) => {
     const timeDiff = Math.ceil(
       (currentDate - publishDateTime) / (1000 * 60 * 60 * 24),
     );
-    return timeDiff >= 0 && timeDiff < 7;
+    const newFlag = item.newFlag;
+    return newFlag && timeDiff >= 0 && timeDiff < 7;
   });
 
   // Filter the remaining lyrics based on numbering
@@ -331,76 +341,60 @@ const ArtistSongList = ({route, navigation}) => {
   // Concatenate the filtered lyrics with the remaining lyrics
   const mergedLyrics = [...filteredLyric, ...remainingLyrics];
 
-  const dismissKeyboard = () => {
-    if (searchHeaderRef.current) {
-      searchHeaderRef.current.hide();
-    }
-  };
-
   return (
-    <KeyboardAwareScrollView
-      resetScrollToCoords={{x: 0, y: 0}}
-      scrollEnabled={true}>
+    <SafeAreaView>
       <View>
-        <SafeAreaView>
-          <View>
-            <SearchHeader
-              ref={searchHeaderRef}
-              placeholder="Search..."
-              placeholderColor="gray"
-              autoFocus={true}
-              dropShadowed={true}
-              visibleInitially={false}
-              persistent={false}
-              enableSuggestion={false}
-              entryAnimation="from-right-side"
-              topOffset={1}
-              iconColor="#673AB7"
-              onHide={event => {
-                setHeader(true);
-              }}
-              onEnteringSearch={event => {
-                handleSearch(event.nativeEvent.text);
-              }}
-              onSearch={event => {
-                handleSearch(event.nativeEvent.text);
-              }}
-              style={styles.searchHeader}
-            />
-          </View>
-          <TouchableWithoutFeedback onPress={dismissKeyboard}>
-            <View>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{marginTop: header ? 0 : 55}}
-                data={tags}
-                renderItem={renderTags}
-                keyExtractor={item => item.id.toString()}
-              />
-              <FlatList
-                scrollEnabled={false}
-                data={
-                  searchText === '' && selectedTags.length === 0
-                    ? mergedLyrics
-                    : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
-                }
-                renderItem={renderListItem}
-                keyExtractor={item => item.id.toString()}
-                ListEmptyComponent={renderEmptyList}
-                refreshControl={
-                  <RefreshControl
-                    tintColor="#673AB7"
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                  />
-                }
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </SafeAreaView>
+        <SearchHeader
+          ref={searchHeaderRef}
+          placeholder="Search..."
+          placeholderColor="gray"
+          autoFocus={true}
+          dropShadowed={true}
+          visibleInitially={false}
+          persistent={false}
+          enableSuggestion={false}
+          entryAnimation="from-right-side"
+          topOffset={1}
+          iconColor="#673AB7"
+          onHide={event => {
+            setHeader(true);
+          }}
+          onEnteringSearch={event => {
+            handleSearch(event.nativeEvent.text);
+          }}
+          onSearch={event => {
+            handleSearch(event.nativeEvent.text);
+          }}
+          style={styles.searchHeader}
+        />
       </View>
-    </KeyboardAwareScrollView>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{marginTop: header ? 0 : 55}}
+        data={tags}
+        renderItem={renderTags}
+        keyExtractor={item => item.id.toString()}
+      />
+      <FlatList
+        scrollEnabled={false}
+        data={
+          searchText === '' && selectedTags.length === 0
+            ? mergedLyrics
+            : filteredLyrics.sort((a, b) => a.numbering - b.numbering)
+        }
+        renderItem={renderListItem}
+        keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={renderEmptyList}
+        refreshControl={
+          <RefreshControl
+            tintColor="#673AB7"
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      />
+    </SafeAreaView>
   );
 };
 
@@ -446,8 +440,7 @@ const styles = StyleSheet.create({
   emptyListText: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginVertical: '70%',
   },
 });
 
-export default withNavigation(ArtistSongList);
+export default withNavigation(CatagoryList);

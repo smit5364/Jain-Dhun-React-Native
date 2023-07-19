@@ -75,6 +75,7 @@ const CategoryDisplay = ({navigation}) => {
       />
       <SingleRow
         navigation={navigation}
+        redirect={'BhagwanSongList'}
         title="24 Tirthenkar"
         data={tirtankarData}
       />

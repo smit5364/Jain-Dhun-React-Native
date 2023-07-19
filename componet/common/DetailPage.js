@@ -3,7 +3,7 @@ import {ScrollView, Text, View, Linking, ToastAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {FAB} from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import CustomMaterialMenu from './CustomMaterialMenu';
+import CustomMaterialMenu from '../Home/CustomMaterialMenu';
 const DetailPage = ({route, navigation}) => {
   const {item} = route.params;
   const [isSaved, setIsSaved] = useState(false);

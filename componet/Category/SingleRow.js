@@ -62,6 +62,8 @@ const SingleRow = ({navigation, title, data, redirect, collection}) => {
                 onPress={() => {
                   navigation.navigate(redirect, {
                     artist: item.name,
+                    bhagwan: item.name,
+                    bhagwanDisplay: item.displayName,
                     collection: item.name,
                     collectionDisplayName: item.displayName,
                   });

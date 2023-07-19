@@ -15,7 +15,7 @@ import {
   StatusBar,
 } from 'react-native';
 import SearchHeader from 'react-native-search-header';
-import DetailPage from './componet/DetailPage';
+import DetailPage from './componet/common/DetailPage';
 
 const Stack = createNativeStackNavigator();
 

@@ -6,7 +6,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SavedLyrics from './SavedLyrics';
-import DetailPage from './DetailPage';
+import DetailPage from '../common/DetailPage';
 const Stack = createNativeStackNavigator();
 const ProfileDisplay = ({navigation}) => {
   return (
@@ -44,7 +44,7 @@ const ProfileDisplay = ({navigation}) => {
           <Text style={{flex: 1, color: '#673AB7', fontSize: 18}}>Saved</Text>
         </View>
       </TouchableOpacity>
-      <View
+      {/* <View
         style={{
           borderBottomColor: 'rgba(0,0,0,0.2)',
           borderBottomWidth: 1,
@@ -76,7 +76,7 @@ const ProfileDisplay = ({navigation}) => {
         <Text style={{flex: 1, color: '#673AB7', fontSize: 18}}>
           Update Data
         </Text>
-      </View>
+      </View> */}
     </View>
   );
 };

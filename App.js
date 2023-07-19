@@ -1,18 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import {useNetInfo} from '@react-native-community/netinfo';
-// ...
-
-import {Dimensions, StatusBar} from 'react-native';
+import {Dimensions, StatusBar, ToastAndroid} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import HomeStack from './componet/HomeStack';
-import Category from './componet/Category';
-import Profile from './componet/Profile';
-import SplashScreen from './componet/SplashScreen';
+import HomeStack from './componet/Home/HomeStack';
+import Category from './componet/Category/Category';
+import Profile from './componet/Profile/Profile';
+import SplashScreen from './componet/common/SplashScreen';
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -27,32 +25,46 @@ const App = () => {
   useEffect(() => {
     if (netInfo.isConnected) {
       fetchData();
+    } else {
+      checkCachedData();
     }
   }, [netInfo.isConnected]);
 
+  const checkCachedData = async () => {
+    try {
+      const cachedTagData = await AsyncStorage.getItem('tagData');
+      const cachedArtistData = await AsyncStorage.getItem('artistData');
+
+      if (!cachedTagData && !cachedArtistData) {
+        showNoDataToast();
+      } else {
+        setTagData(cachedTagData ? JSON.parse(cachedTagData) : []);
+        setArtistData(cachedArtistData ? JSON.parse(cachedArtistData) : []);
+      }
+    } catch (error) {
+      console.error('Error reading cached data:', error);
+    }
+  };
+
+  const showNoDataToast = () => {
+    const timer = setTimeout(() => {
+      ToastAndroid.show(
+        'Internet connection is required to fetch data.',
+        ToastAndroid.LONG,
+      );
+    }, 1400);
+
+    return () => clearTimeout(timer);
+  };
+
   const fetchData = async () => {
     try {
-      // Check if there is an internet connection
-      if (!netInfo.isConnected) {
-        // Use the cached data from AsyncStorage if there is no internet connection
-        const cachedTagData = await AsyncStorage.getItem('tagData');
-        const cachedArtistData = await AsyncStorage.getItem('artistData');
-        if (cachedTagData && cachedArtistData) {
-          setTagData(JSON.parse(cachedTagData));
-          setArtistData(JSON.parse(cachedArtistData));
-        }
-        return;
-      }
-
-      // Fetch data from Firestore or any other data source
       const tagData = await fetchTagData();
       const artistData = await fetchArtistData();
 
-      // Store data in AsyncStorage
       await AsyncStorage.setItem('tagData', JSON.stringify(tagData));
       await AsyncStorage.setItem('artistData', JSON.stringify(artistData));
 
-      // Update state with fetched data
       setTagData(tagData);
       setArtistData(artistData);
     } catch (error) {
@@ -85,7 +97,7 @@ const App = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 1300); // 3000 milliseconds = 3 seconds
+    }, 1300);
 
     return () => clearTimeout(timer);
   }, []);

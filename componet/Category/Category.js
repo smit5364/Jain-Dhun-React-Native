@@ -22,8 +22,9 @@ import SingleRow from './SingleRow';
 import DoubleColum from './DoubleColum';
 import CategoryDisplay from './CategoryDisplay';
 import ArtistSongList from './ArtistSongList';
-import DetailPage from './DetailPage';
+import DetailPage from '../common/DetailPage';
 import CatagoryList from './CatagoryList';
+import BhagwanSongList from './BhagwanSongList';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +49,20 @@ const Category = () => {
       <Stack.Screen
         name="ArtistSongList"
         component={ArtistSongList}
+        options={{
+          headerStyle: {
+            backgroundColor: '#673AB7',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="BhagwanSongList"
+        component={BhagwanSongList}
         options={{
           headerStyle: {
             backgroundColor: '#673AB7',
