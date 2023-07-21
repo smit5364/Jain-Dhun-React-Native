@@ -36,7 +36,7 @@ const App = () => {
       const cachedArtistData = await AsyncStorage.getItem('artistData');
 
       if (!cachedTagData && !cachedArtistData) {
-        showNoDataToast();
+        netInfo.isConnected ? null : showNoDataToast();
       } else {
         setTagData(cachedTagData ? JSON.parse(cachedTagData) : []);
         setArtistData(cachedArtistData ? JSON.parse(cachedArtistData) : []);
