@@ -1,13 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import firestore from '@react-native-firebase/firestore';
-import React, {useEffect, useState, useLayoutEffect} from 'react';
-import SearchHeader from 'react-native-search-header';
-import {withNavigation} from 'react-navigation';
-
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import React, { useEffect, useState } from 'react';
+import { withNavigation } from 'react-navigation';
 import {
   ActivityIndicator,
   FlatList,
@@ -19,20 +14,17 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
 } from 'react-native';
 
 const phoneFontScale = PixelRatio.getFontScale();
 
-const List = ({navigation}) => {
-  const searchHeaderRef = React.useRef(null);
+const List = ({ navigation }) => {
   const [header, setHeader] = useState(true);
   const [lyrics, setLyrics] = useState([]);
   const [tags, setTags] = useState([]);
-  const [filteredLyrics, setFilteredLyrics] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [searchText, setSearchText] = React.useState('');
+  const [filteredLyrics, setFilteredLyrics] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -94,7 +86,7 @@ const List = ({navigation}) => {
         const jsonData = apiData.length > 0 ? apiData : storedData;
         const tagsData = storedTags.length > 0 ? storedTags : [];
         setLyrics(jsonData);
-        setTags(tagsData); // Add this line to set the tags state
+        setTags(tagsData);
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -120,27 +112,6 @@ const List = ({navigation}) => {
     const filteredItems = filterData(text);
     setFilteredLyrics(filteredItems);
   };
-
-  useLayoutEffect(() => {
-    const showSearchBox = () => {
-      searchHeaderRef.current.isHidden ? searchHeaderRef.current.show() : null;
-    };
-
-    navigation.setOptions({
-      headerRight: () => (
-        <MaterialCommunityIcons
-          name="magnify"
-          color="#fff"
-          onPress={() => {
-            showSearchBox();
-            setHeader(false);
-          }}
-          size={26}
-        />
-      ),
-      headerShown: header,
-    });
-  }, [navigation, header]);
 
   const handleTagPress = tag => {
     let newSelectedTags = [];
@@ -182,7 +153,7 @@ const List = ({navigation}) => {
     return lyrics;
   };
 
-  const renderTags = ({item}) => (
+  const renderTags = ({ item }) => (
     <TouchableOpacity
       style={[
         styles.container,
@@ -213,8 +184,8 @@ const List = ({navigation}) => {
     setRefreshing(false);
   };
 
-  const renderListItem = ({item}) => {
-    const {id, numbering, title, content, publishDate, newFlag} = item;
+  const renderListItem = ({ item }) => {
+    const { id, numbering, title, content, publishDate, newFlag } = item;
 
     // Calculate the time difference in days between the publish date and today
     const currentDate = new Date();
@@ -230,12 +201,11 @@ const List = ({navigation}) => {
     return (
       <Pressable
         onPress={() => {
-          navigation.navigate('Details', {item});
+          navigation.navigate('Details', { item });
           setSearchText('');
           setHeader(true);
-          searchHeaderRef.current.hide();
         }}
-        style={{marginHorizontal: 5}}>
+        style={{ marginHorizontal: 5 }}>
         <View
           key={id}
           style={{
@@ -246,7 +216,7 @@ const List = ({navigation}) => {
             flexDirection: 'row',
             alignItems: 'center',
           }}>
-          <View style={{height: 40}}>
+          <View style={{ height: 40 }}>
             <Text
               style={{
                 marginRight: 20,
@@ -271,11 +241,11 @@ const List = ({navigation}) => {
               {numberingText}
             </Text>
           </View>
-          <View style={{flex: 1}}>
-            <Text style={{fontWeight: 'bold', fontSize: 16 * phoneFontScale}}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16 * phoneFontScale }}>
               {title}
             </Text>
-            <Text style={{fontSize: 14 * phoneFontScale}} numberOfLines={1}>
+            <Text style={{ fontSize: 14 * phoneFontScale }} numberOfLines={1}>
               {content.split('\n')[0]}
             </Text>
           </View>
@@ -327,35 +297,10 @@ const List = ({navigation}) => {
 
   return (
     <SafeAreaView>
-      <View>
-        <SearchHeader
-          ref={searchHeaderRef}
-          placeholder="Search..."
-          placeholderColor="gray"
-          autoFocus={true}
-          dropShadowed={true}
-          visibleInitially={false}
-          persistent={false}
-          enableSuggestion={false}
-          entryAnimation="from-right-side"
-          topOffset={1}
-          iconColor="#673AB7"
-          onHide={event => {
-            setHeader(true);
-          }}
-          onEnteringSearch={event => {
-            handleSearch(event.nativeEvent.text);
-          }}
-          onSearch={event => {
-            handleSearch(event.nativeEvent.text);
-          }}
-          style={styles.searchHeader}
-        />
-      </View>
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{marginTop: header ? 0 : 55}}
+        style={{ marginTop: header ? 0 : 55 }}
         data={tags}
         renderItem={renderTags}
         keyExtractor={item => item.id.toString()}
@@ -386,12 +331,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  searchHeader: {
-    header: {
-      height: 55,
-      backgroundColor: '#fdfdfd',
-    },
   },
   tagsContainer: {
     marginTop: 0,
